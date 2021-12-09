@@ -58,7 +58,7 @@ const Project = {
         },
         title: {
             English: 'File Filter',
-            Russian: 'Фильтер файлов'
+            Russian: 'Фильтр файлов'
         },
         helpers: {
             filterType: {
@@ -72,7 +72,11 @@ const Project = {
             pathToFoderWhereSave: {
                 English: 'Insert a link to the folder to save to.',
                 Russian: 'Вставь путь к папке куда сохранять.'
-            }
+            },
+        },
+        transfareMessage: {
+            English: 'Filtered files',
+            Russian: 'Отлильтрованные файлы'
         }
       }
     },
@@ -98,6 +102,7 @@ const Project = {
             this.startButton = this.startLabel[this.lang]
             this.startedProgram = false
             this.error = false
+            localStorage.setItem('started', '0');
             await eel.stop_app()();
         },
         async handleClickStart() {
@@ -108,12 +113,14 @@ const Project = {
 
                 const isSaveToFolder = this.activeState === 'save_to_folder'
                 const isSaveByType = this.activeState === 'save_by_file_type'
-
-                await eel.start_file_setter(this.pathToFolderForFilter, this.pathTpFolderToFilter, isSaveToFolder, isSaveByType)();
+                localStorage.setItem('started', '1');
+                const result = await eel.start_file_setter(this.pathToFolderForFilter, this.pathTpFolderToFilter, isSaveToFolder, isSaveByType)();
+                showNotification(result)
             } catch (e) {
                 this.startButton = this.problemLabel[this.lang]
                 this.startedProgram = false
                 this.error = true
+                localStorage.setItem('started', '0');
                 await eel.stop_app()();
             }
         },

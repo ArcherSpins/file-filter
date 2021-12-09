@@ -38,60 +38,72 @@ class PausingObserver(Observer):
 
 observer = PausingObserver()
 
+def handle_filter(folder_track, folder_dest, intoFolder = False, byTypeFile = False):
+    movedFiles = []
+    
+    for filename in os.listdir(folder_track):
+        ext = filename.split('.')
+        if len(ext) > 1:
+            file = folder_track + "/" + filename
+            new_path = ''
+            
+            if intoFolder:
+                new_path = folder_dest
+            
+            elif byTypeFile:
+                if ext[1].lower() == 'jpg' or ext[1].lower() == 'png' or ext[1].lower() == 'svg' or ext[1].lower() == 'jpeg':
+                    new_path = folder_dest + "/images"
+                elif ext[1].lower() == 'doc' or ext[1].lower() == 'docx' or ext[1].lower() == 'pdf':
+                    new_path = folder_dest + "/documents"
+                elif ext[1].lower() == 'txt':
+                    new_path = folder_dest + "/texts"
+                elif ext[1].lower() in musics:
+                    new_path = folder_dest + "/musics"
+                elif ext[1].lower() in videos:
+                    new_path = folder_dest + "/videos"
+                elif ext[1].lower() == 'exe' or ext[1].lower() == 'dll' or ext[1].lower() == 'dmg' or ext[1].lower() == 'sh' or ext[1].lower() == 'deb':
+                    new_path = folder_dest + "/downloaders"
+                elif ext[1].lower() == 'zip' or ext[1].lower() == 'rar':
+                    new_path = folder_dest + "/archives"
+                else:
+                    new_path = folder_dest + "/other"
+                        
+            else:
+                if len(ext) > 1:
+                    new_path = folder_dest + "/" + ext[1].lower()
+                    
+            if len(new_path) == 0:
+                new_path = 'incorrect-files'
+                
+            try:
+                os.mkdir(new_path)
+            except OSError:
+                pass
+            
+            for element in os.scandir(new_path):
+                if element.is_file():
+                    if element.name == filename:
+                        filename = ext[0] + str(random.random()) + "." + ext[1].lower()
+                        break
+            
+            movedFiles.append(filename)
+            
+            os.rename(file, new_path + "/" + filename)
+        
+    
+    return movedFiles
+
+
 @eel.expose
 def start_file_setter(folder_track, folder, intoFolder = False, byTypeFile = False):
     folder_dest = folder or folder_track
     
+    movedFiles = handle_filter(folder_track, folder_dest, intoFolder, byTypeFile) or []
+    
     class Handler(FileSystemEventHandler):
         def on_modified(self, event):
-            for filename in os.listdir(folder_track):
-                if os.path.isfile(filename):
-                    ext = filename.split('.')
-                    file = folder_track + "/" + filename
-                    new_path = ''
-                    
-                    if intoFolder:
-                        new_path = folder_dest
-                    
-                    
-                    elif byTypeFile:
-                        if len(ext) > 1:
-                            if ext[1].lower() == 'jpg' or ext[1].lower() == 'png' or ext[1].lower() == 'svg' or ext[1].lower() == 'jpeg':
-                                new_path = folder_dest + "/images"
-                            elif ext[1].lower() == 'doc' or ext[1].lower() == 'docx' or ext[1].lower() == 'pdf':
-                                new_path = folder_dest + "/documents"
-                            elif ext[1].lower() == 'txt':
-                                new_path = folder_dest + "/texts"
-                            elif ext[1].lower() in musics:
-                                new_path = folder_dest + "/musics"
-                            elif ext[1].lower() in videos:
-                                new_path = folder_dest + "/videos"
-                            elif ext[1].lower() == 'exe' or ext[1].lower() == 'dll' or ext[1].lower() == 'dmg' or ext[1].lower() == 'sh' or ext[1].lower() == 'deb':
-                                new_path = folder_dest + "/downloaders"
-                            elif ext[1].lower() == 'zip' or ext[1].lower() == 'rar':
-                                new_path = folder_dest + "/archives"
-                            else:
-                                new_path = folder_dest + "/other"
-                                
-                    else:
-                        if len(ext) > 1:
-                            new_path = folder_dest + "/" + ext[1].lower()
-                            
-                    if len(new_path) == 0:
-                        new_path = 'incorrect-files'
-                        
-                    try:
-                        os.mkdir(new_path)
-                    except OSError:
-                        pass
-                    
-                    for element in os.scandir(new_path):
-                        if element.is_file():
-                            if element.name == filename:
-                                filename = ext[0] + str(random.random()) + "." + ext[1].lower()
-                                break
-                    
-                    os.rename(file, new_path + "/" + filename)
+            result = handle_filter(folder_track, folder_dest, intoFolder, byTypeFile)
+            eel.showNotification(result)()
 
 
     handle = Handler()
@@ -99,7 +111,7 @@ def start_file_setter(folder_track, folder, intoFolder = False, byTypeFile = Fal
 
     observer.start()
     
-    return True
+    return movedFiles
 
 def new_observer():
     global observer

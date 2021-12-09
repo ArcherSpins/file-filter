@@ -1,6 +1,39 @@
 body {
-    background: linear-gradient(120deg, #8f0e8f, #6951f5);
+    /* background: linear-gradient(120deg, #8f0e8f, #6951f5); */
+    background-image: url(./back.gif);
+    background-repeat: no-repeat;
+    background-size: cover;
     padding: 10px;
+    height: 100vh;
+    background-position: center center;
+    background-attachment: fixed;
+    position: relative;
+}
+
+body::-webkit-scrollbar {
+    width: 8px;               /* ширина scrollbar */
+}
+body::-webkit-scrollbar-track {
+    background: black;        /* цвет дорожки */
+}
+body::-webkit-scrollbar-thumb {
+    background-color: blue;    /* цвет плашки */
+    border-radius: 20px;       /* закругления плашки */
+    border: 3px solid black;  /* padding вокруг плашки */
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    background-color: rgba(0,0,0,.4);
+}
+
+#app {
+    position: relative;
 }
 
 .title {
@@ -17,4 +50,13 @@ input {
 .form-field {
     flex: 1;
     max-width: 350px;
+}
+
+.notifications {
+    max-width: 400px;
+    padding: 4px;
+}
+
+.color-white {
+    color: rgb(248, 236, 236);
 }
